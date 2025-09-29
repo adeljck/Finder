@@ -4,6 +4,8 @@
   <img src="assets/logo.svg" alt="finder logo" width="420" />
 </p>
 
+![Finder](https://socialify.git.ci/adeljck/Finder/image?description=1&descriptionEditable=Windows%20Post%20Exploit%20Tool&font=Bitter&forks=1&issues=1&language=1&logo=https://avatars.githubusercontent.com/u/24542600?v=4&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Dark)
+
 [简体中文](README.md) | [English]
 
 A multithreaded Windows command-line tool that scans file and directory names for keywords and outputs UTF-8 CSV.

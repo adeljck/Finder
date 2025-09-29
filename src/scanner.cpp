@@ -33,7 +33,32 @@ static void worker(DirQueue &dq, const Config &cfg) {
                 wstring name = fd.cFileName;
                 wstring name_lower = to_lower_w(name);
                 wstring found_keyword;
-                if (name_contains_keyword(name_lower, cfg, found_keyword)) output_match(cfg, join_path(dir, name), name, found_keyword);
+                bool matched = false;
+                wstring out_name = name;
+                wstring out_full = join_path(dir, name);
+                // Recycle Bin: if this is an $Ixxxxx file, try original name match
+                if (!matched && path_is_under_recycle_bin(dir)) {
+                    // $Ixxxxx.* files carry metadata
+                    if (!name.empty() && name[0] == L'$') {
+                        if (name.size() >= 2 && (name[1] == L'I' || name[1] == L'i')) {
+                            wstring orig_full, orig_name;
+                            if (try_parse_recycle_i_file(out_full, orig_full, orig_name)) {
+                                wstring orig_lower = to_lower_w(orig_name);
+                                if (name_contains_keyword(orig_lower, cfg, found_keyword)) {
+                                    matched = true;
+                                    out_name = orig_name;
+                                    out_full = orig_full;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!matched) {
+                    if (name_contains_keyword(name_lower, cfg, found_keyword)) {
+                        matched = true;
+                    }
+                }
+                if (matched) output_match(cfg, out_full, out_name, found_keyword);
                 bool is_dir = (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
                 bool is_reparse = (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
                 if (is_dir && cfg.recursive) { if (!(is_reparse && !cfg.follow_symlink)) dq.push(join_path(dir, name)); }

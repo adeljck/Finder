@@ -11,19 +11,36 @@ Config parse_args(int argc, wchar_t **argv, vector<wstring> &paths) {
     cfg.threads = get_default_threads();
     for (int i = 1; i < argc; ++i) {
         wstring s = argv[i];
-        if (s == L"-t" && i + 1 < argc) cfg.threads = std::stoi(argv[++i]);
-        else if (s == L"-o" && i + 1 < argc) cfg.output_file = argv[++i];
+        if (s == L"-t") {
+            if (i + 1 < argc) {
+                try {
+                    int parsed = std::stoi(argv[++i]);
+                    cfg.threads = parsed > 0 ? parsed : 1;
+                } catch (...) {
+                    cfg.invalid_args = true;
+                }
+            } else cfg.invalid_args = true;
+        }
+        else if (s == L"-o") { if (i + 1 < argc) cfg.output_file = argv[++i]; else cfg.invalid_args = true; }
         else if (s == L"-norec") cfg.recursive = false;
         else if (s == L"-followsymlink") cfg.follow_symlink = true;
         else if (s == L"-all") cfg.scan_all = true;
         else if (s == L"--debug") cfg.debug = true;
         else if (s == L"--debug-denied") cfg.debug_denied = true;
-        else if (s == L"-k" && i + 1 < argc) {
-            wstring k = argv[++i]; size_t pos = 0;
-            while (pos < k.size()) { size_t comma = k.find(L',', pos); wstring part = (comma == wstring::npos) ? k.substr(pos) : k.substr(pos, comma - pos); if (!part.empty()) cfg.keywords.push_back(to_lower_w(part)); if (comma == wstring::npos) break; pos = comma + 1; }
-        } else paths.push_back(s);
+        else if (s == L"-nonntfs") cfg.allow_non_ntfs = true;
+        else if (s == L"-h" || s == L"--help") cfg.show_help = true;
+        else if (s == L"-k") {
+            if (i + 1 < argc) {
+                wstring k = argv[++i]; size_t pos = 0;
+                while (pos < k.size()) { size_t comma = k.find(L',', pos); wstring part = (comma == wstring::npos) ? k.substr(pos) : k.substr(pos, comma - pos); if (!part.empty()) cfg.keywords.push_back(to_lower_w(part)); if (comma == wstring::npos) break; pos = comma + 1; }
+            } else cfg.invalid_args = true;
+        } else if (!s.empty() && s[0] == L'-') {
+            cfg.invalid_args = true;
+        } else {
+            paths.push_back(s);
+        }
     }
-    if (cfg.keywords.empty()) cfg.keywords = { to_lower_w(L"vpn"), to_lower_w(L"password"), to_lower_w(L"passwd"), to_lower_w(L"pwd"), to_lower_w(L"account"), to_lower_w(L"账户"), to_lower_w(L"密码") };
+    if (cfg.keywords.empty()) cfg.keywords = { to_lower_w(L"vpn"), to_lower_w(L"password"), to_lower_w(L"passwd"), to_lower_w(L"pwd"), to_lower_w(L"account"), to_lower_w(L"账户"), to_lower_w(L"密码"), to_lower_w(L"账号"), to_lower_w(L"台账"), to_lower_w(L"服务器") };
     return cfg;
 }
 

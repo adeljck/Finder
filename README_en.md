@@ -10,6 +10,10 @@
 
 A multithreaded Windows command-line tool that scans file and directory names for keywords and outputs UTF-8 CSV.
 
+### Principles
+
+- NTFS/MFT: On NTFS volumes, directory enumeration is backed by the `$MFT` directory index (B+ tree). This tool traverses via Win32 file enumeration APIs (e.g., `FindFirstFileW/FindNextFileW`), indirectly leveraging NTFS indexing for efficient listing. It does not parse raw `$MFT` records or disk sectors directly.
+
 ### Build
 
 - PowerShell (recommended):
@@ -43,8 +47,9 @@ finder.exe [options] [PATH1 PATH2 ...]
 - `-o <file>`: Write results to the specified file (UTF-8, no BOM). If not set, a timestamped file `result_YYYYMMDD_HHMMSS.csv` is created in the current directory.
 - `-norec`: Non-recursive. Only scan the current directory level.
 - `-followsymlink`: Follow symbolic links/reparse points when recursing (off by default to avoid loops).
-- `-k <kw1,kw2,...>`: Comma-separated keywords (case-insensitive). If not specified, defaults to `vpn,password,passwd,pwd,account,账户,密码`.
+- `-k <kw1,kw2,...>`: Comma-separated keywords (case-insensitive). If not specified, defaults to `vpn,password,passwd,pwd,account,账户,密码,账号,台账,服务器`.
 - `-all`: Scan all available drives (fixed/removable) without specifying paths.
+- `-nonntfs`: Allow traversal of non-NTFS volumes. By default, non-NTFS roots (FAT32/exFAT/network) are skipped; with this flag they are scanned like NTFS.
 - `--debug`: Print every CSV hit to the console (by default only the total count is printed).
 - `--debug-denied`: When access is denied for a directory, print `DENIED: <path>` to the console.
 
@@ -89,6 +94,12 @@ finder.exe -all
 - Thread-safe output: a global mutex ensures each record is written atomically.
 - The output file is opened once at the first write (or at startup) and truncated; use `-o` for a custom file.
 
+### Recycle Bin Matching ($I metadata)
+
+- Supports matching by original file name inside Recycle Bin paths (e.g., `C:\$Recycle.Bin\<SID>\`; legacy `C:\RECYCLER\`/`C:\RECYCLED\`).
+- How it works: when encountering `$Ixxxxx.*` metadata files, the tool parses the recorded original full path and name. If the original name matches a keyword, a hit is emitted using the original path/name.
+- Limitations: Parses the Vista/Win7+ `$I` format only; does not read `$R` data contents. Other users' SID directories are typically access-restricted; unauthorized directories are skipped (use `--debug-denied` to log them).
+
 ### Access Denied / WOW64 Notes
 
 - Directories without access permissions are skipped; with `--debug-denied`, paths are logged as `DENIED: <path>`.
@@ -120,14 +131,4 @@ finder.exe -all
 ├─ build.cmd             # cmd wrapper for build.ps1
 └─ README.md             # Chinese guide
 ```
-
-### Contributing
-
-- Ensure `./build.ps1` builds successfully and only outputs `finder.exe`.
-- Keep reproducible builds (`/Brepro`) and avoid generating PDBs. Do not embed personal paths or timestamps via macros.
-- Code style:
-  - Use meaningful names; prefer early returns; avoid deep nesting.
-  - Windows-specific code lives in `src/`; cross-cutting helpers in `utils`.
-- Document changes in `README.md` if behavior or options change. Note any backward compatibility impacts to CSV.
-
 

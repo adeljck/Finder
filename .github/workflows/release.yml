@@ -1,0 +1,64 @@
+name: build-and-release-msvc
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build (MSVC, x64)
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+          ./build.ps1 -Arch x64
+
+      - name: Keep x64 artifact
+        shell: pwsh
+        run: |
+          Copy-Item -Force finder.exe finder-x64.exe
+          ./build.ps1 -Clean
+
+      - name: Build (MSVC, x86)
+        shell: pwsh
+        run: |
+          Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+          ./build.ps1 -Arch x86
+
+      - name: Keep x86 artifact
+        shell: pwsh
+        run: |
+          Copy-Item -Force finder.exe finder-x86.exe
+
+      - name: Generate checksums
+        shell: pwsh
+        run: |
+          $files = @('finder-x64.exe','finder-x86.exe')
+          $out = ''
+          foreach ($f in $files) {
+            $h = Get-FileHash $f -Algorithm SHA256
+            $out += ("{0}  {1}" -f $h.Hash.ToLower(), $f) + "`n"
+          }
+          Set-Content -NoNewline -Path sha256sums.txt -Value $out
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            finder-x64.exe
+            finder-x86.exe
+            sha256sums.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+

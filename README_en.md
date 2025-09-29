@@ -50,8 +50,10 @@ finder.exe [options] [PATH1 PATH2 ...]
 - `-k <kw1,kw2,...>`: Comma-separated keywords (case-insensitive). If not specified, defaults to `vpn,password,passwd,pwd,account,账户,密码,账号,台账,服务器`.
 - `-all`: Scan all available drives (fixed/removable) without specifying paths.
 - `-nonntfs`: Allow traversal of non-NTFS volumes. By default, non-NTFS roots (FAT32/exFAT/network) are skipped; with this flag they are scanned like NTFS.
+- `-extexclude ext1,ext2`: Exclude files with these extensions (no dot, comma-separated, e.g., `log,tmp,bak`).
 - `--debug`: Print every CSV hit to the console (by default only the total count is printed).
 - `--debug-denied`: When access is denied for a directory, print `DENIED: <path>` to the console.
+ - `-utf8bom`: Write a UTF-8 BOM at the beginning of the output file (for legacy tools/systems).
 
 ### Output and Logging
 

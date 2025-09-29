@@ -29,6 +29,8 @@ static void print_usage() {
                 L"  -norec               Non-recursive\n"
                 L"  -followsymlink       Follow symlinks/reparse points\n"
                 L"  -nonntfs             Allow scanning non-NTFS volumes (skipped by default)\n"
+                L"  -extexclude ext1,ext2  Exclude file extensions (comma-separated, no dots)\n"
+                L"  -utf8bom             Write UTF-8 BOM at file start (for legacy tools)\n"
                 L"  -h, --help           Show this help and exit\n";
 }
 

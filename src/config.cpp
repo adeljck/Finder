@@ -29,10 +29,25 @@ Config parse_args(int argc, wchar_t **argv, vector<wstring> &paths) {
         else if (s == L"--debug-denied") cfg.debug_denied = true;
         else if (s == L"-nonntfs") cfg.allow_non_ntfs = true;
         else if (s == L"-h" || s == L"--help") cfg.show_help = true;
+        else if (s == L"-utf8bom") cfg.utf8_bom = true;
         else if (s == L"-k") {
             if (i + 1 < argc) {
                 wstring k = argv[++i]; size_t pos = 0;
                 while (pos < k.size()) { size_t comma = k.find(L',', pos); wstring part = (comma == wstring::npos) ? k.substr(pos) : k.substr(pos, comma - pos); if (!part.empty()) cfg.keywords.push_back(to_lower_w(part)); if (comma == wstring::npos) break; pos = comma + 1; }
+            } else cfg.invalid_args = true;
+        } else if (s == L"-extexclude") {
+            if (i + 1 < argc) {
+                wstring k = argv[++i]; size_t pos = 0;
+                while (pos < k.size()) {
+                    size_t comma = k.find(L',', pos);
+                    wstring part = (comma == wstring::npos) ? k.substr(pos) : k.substr(pos, comma - pos);
+                    if (!part.empty()) {
+                        // strip leading dot and to lower
+                        if (!part.empty() && part[0] == L'.') part.erase(part.begin());
+                        cfg.exclude_exts.push_back(to_lower_w(part));
+                    }
+                    if (comma == wstring::npos) break; pos = comma + 1;
+                }
             } else cfg.invalid_args = true;
         } else if (!s.empty() && s[0] == L'-') {
             cfg.invalid_args = true;

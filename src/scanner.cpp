@@ -36,6 +36,17 @@ static void worker(DirQueue &dq, const Config &cfg) {
                 bool matched = false;
                 wstring out_name = name;
                 wstring out_full = join_path(dir, name);
+                bool is_dir = (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
+                // Extension exclude filter (files only)
+                if (!is_dir && !cfg.exclude_exts.empty()) {
+                    size_t dot = name.find_last_of(L'.');
+                    if (dot != wstring::npos && dot + 1 < name.size()) {
+                        wstring ext = to_lower_w(name.substr(dot + 1));
+                        bool excluded = false;
+                        for (auto &ex : cfg.exclude_exts) { if (ext == ex) { excluded = true; break; } }
+                        if (excluded) { continue; }
+                    }
+                }
                 // Recycle Bin: if this is an $Ixxxxx file, try original name match
                 if (!matched && path_is_under_recycle_bin(dir)) {
                     // $Ixxxxx.* files carry metadata
@@ -59,7 +70,6 @@ static void worker(DirQueue &dq, const Config &cfg) {
                     }
                 }
                 if (matched) output_match(cfg, out_full, out_name, found_keyword);
-                bool is_dir = (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
                 bool is_reparse = (fd.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
                 if (is_dir && cfg.recursive) { if (!(is_reparse && !cfg.follow_symlink)) dq.push(join_path(dir, name)); }
             } while (FindNextFileW(h, &fd));

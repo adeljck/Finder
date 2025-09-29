@@ -46,8 +46,10 @@ finder.exe [选项] [路径1 路径2 ...]
   - 未指定时，默认关键词：`vpn,password,passwd,pwd,account,账户,密码,账号,台账,服务器`。
 - `-all`: 扫描所有可用盘符（固定盘/可移动盘），无需再指定路径。
 - `-nonntfs`: 允许遍历非 NTFS 卷。默认跳过非 NTFS（FAT32/exFAT/网络盘等）根目录；指定此参数后将对这些卷执行同样的目录枚举。
+- `-extexclude ext1,ext2`：排除这些后缀的文件（不带点，逗号分隔，如 `log,tmp,bak`）。
 - `--debug`: 控制台输出每条命中明细（默认仅输出总命中数）。
 - `--debug-denied`: 当因权限不足无法进入目录时，在控制台输出被拒绝的目录路径。
+ - `-utf8bom`: 写入 UTF-8 BOM（兼容部分旧工具/系统）。
 
 说明：关键词匹配基于文件名的小写形式进行 `substring` 检查。例如关键词 `pwd` 会命中 `my_pwd_notes.txt`。
 

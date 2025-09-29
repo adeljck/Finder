@@ -4,6 +4,9 @@
   <img src="assets/logo.svg" alt="finder logo" width="420" />
 </p>
 
+![Finder](https://socialify.git.ci/adeljck/Finder/image?description=1&descriptionEditable=Windows后渗透工具&font=Bitter&forks=1&issues=1&language=1&logo=https://avatars.githubusercontent.com/u/24542600?v=4&name=1&owner=1&pattern=Circuit%20Board&pulls=1&stargazers=1&theme=Dark)
+
+
 ［简体中文］| [English](README_en.md)
 
 一个在 Windows 上多线程扫描文件名的命令行工具，按关键词匹配文件/目录名并输出为 UTF-8 编码的 CSV。
